@@ -1,4 +1,4 @@
-# Amazon Sales Forecasting and Dashboard
+# Walmart Sales Forecasting and Dashboard
 
 This project forecasts sales using machine learning and visualizes insights via an interactive dashboard to support business decisions.
 
@@ -11,4 +11,4 @@ This project forecasts sales using machine learning and visualizes insights via 
 See `/data`, `/notebooks`, `/src`, `/dashboard`, etc.
 
 ## Dataset:
-Amazon Sales Dataset from Kaggle: https://www.kaggle.com/datasets/karkavelrajaj/amazon-sales-dataset
+Walmart Sales Dataset from Kaggle: https://www.kaggle.com/datasets/mikhail1681/walmart-sales
