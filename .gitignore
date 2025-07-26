@@ -203,7 +203,7 @@ __pycache__/
 .env
 *.csv
 *.pkl
-models/
-data/processed/
-outputs/
+#models/
+#data/processed/
+#outputs/
 .DS_Store
