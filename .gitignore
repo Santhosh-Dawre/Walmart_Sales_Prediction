@@ -199,10 +199,10 @@ cython_debug/
 
 
 __pycache__/
-*.pyc
-.env
-*.csv
-*.pkl
+#*.pyc
+#.env
+#*.csv
+#*.pkl
 #models/
 #data/processed/
 #outputs/
