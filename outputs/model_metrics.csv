@@ -1,0 +1,4 @@
+Model,MAE,RMSE,R2 Score
+Linear Regression,39256.85,57395.46,0.9895
+Random Forest,24005.59,38692.81,0.9952
+XGBoost,26394.5,39882.65,0.9949

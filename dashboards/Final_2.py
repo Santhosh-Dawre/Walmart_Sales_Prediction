@@ -26,7 +26,7 @@ df, model = load_data()
 # ---------------------------
 st.markdown("""
     <div style='display: flex; align-items: center;'>
-        <img src='C:/Users/Saisa/Downloads/Walmart_Sales/1.png' width='100'/>
+        <img src='https://raw.githubusercontent.com/Santhosh-Dawre/Walmart_Sales_Prediction/main/logo.png' width='100'/>
         <h1 style='margin-left: 20px;'>Walmart Sales Forecast Dashboard</h1>
     </div>
     <hr style='border: 1px solid #ccc;'>
