@@ -12,7 +12,7 @@ st.set_page_config(layout="wide", page_title="Sales Forecast Dashboard")
 @st.cache_data
 def load_data():
     df = pd.read_csv('C:/Users/Saisa/Downloads/Walmart_Sales/data/processed/feature_engineered_sales.csv', parse_dates=['date'])
-    model = joblib.load('C:/Users/Saisa/Downloads/Walmart_Sales/models/xgboost_sales_model.pkl')
+    model = joblib.load('C:/Users/Saisa/Downloads/Walmart_Sales/models/1_xgboost_sales_model.pkl')
     return df, model
 
 df, model = load_data()
