@@ -1,4 +1,4 @@
-# 📊 Streamlit Dashboard with Tab 2 & Tab 3 Enhancements
+
 
 import pandas as pd
 import plotly.express as px
@@ -7,13 +7,11 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from statsmodels.tsa.seasonal import seasonal_decompose
 
-# ---------------------------
-# Load Data
-# ---------------------------
+
 df = pd.read_csv("C:/Users/Saisa/Downloads/Walmart_Sales/data/Processed/feature_engineered_sales.csv", parse_dates=['date'])
 df = df.sort_values("date")
 
-# Create store name mapping
+
 if 'store_name' in df.columns:
     store_mapping = dict(zip(df['store'], df['store_name']))
     df['store_name_full'] = df['store'].map(store_mapping)
@@ -21,7 +19,7 @@ else:
     df['store_name_full'] = "Store " + df['store'].astype(str)
     store_mapping = dict(zip(df['store'], df['store_name_full']))
 
-# Add derived columns
+
 df['month'] = df['date'].dt.to_period('M').astype(str)
 df['day_name'] = df['date'].dt.day_name()
 df['holiday_type'] = df['holiday_flag'].map({0: 'Non-Holiday', 1: 'Holiday'})
@@ -33,19 +31,19 @@ store_options = sorted(df['store'].unique())
 selected_stores = st.sidebar.multiselect("Select Store(s)", store_options, default=[store_options[0]],
                                          format_func=lambda x: store_mapping.get(x, f"Store {x}"))
 
-# Date Range
+
 date_range = st.sidebar.date_input("Select Date Range", [df['date'].min(), df['date'].max()])
 start_date, end_date = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
 
-# Promo filter
+
 promo_filter = st.sidebar.radio("Promotion Week", options=["all", "promo", "no_promo"], index=0,
                                 format_func=lambda x: {"all": "All Weeks", "promo": "Promotion Only", "no_promo": "No Promotion"}[x])
 
-# Holiday filter
+
 holiday_filter = st.sidebar.radio("Holiday Filter", options=["all", "holiday", "non_holiday"], index=0,
                                   format_func=lambda x: {"all": "All Days", "holiday": "Holiday Weeks Only", "non_holiday": "Non-Holiday Weeks"}[x])
 
-# Filter Data
+
 filtered_df = df[df['store'].isin(selected_stores)]
 filtered_df = filtered_df[(filtered_df['date'] >= start_date) & (filtered_df['date'] <= end_date)]
 
@@ -59,15 +57,13 @@ if holiday_filter == "holiday":
 elif holiday_filter == "non_holiday":
     filtered_df = filtered_df[filtered_df['holiday_flag'] == 0]
 
-# ---------------------------
-# Tabs Setup
-# ---------------------------
+
 st.title("📊 Walmart Store Sales Overview")
 tab1, tab2, tab3 = st.tabs(["📈 Time-Series Overview", "📊 Exploratory Analysis", "🌡️ External Factors & Correlation"])
 
-# ---------------------------
-# 📈 Tab 1: Time-Series Overview
-# ---------------------------
+
+# Tab 1: Time-Series Overview
+
 with tab1:
 
     st.subheader("📌 Sales Summary")
@@ -138,9 +134,9 @@ with tab1:
     else:
         st.warning("No data available for selected filters.")
 
-# ---------------------------
+
 # 📊 Tab 2: Exploratory Analysis
-# ---------------------------
+
 with tab2:
     st.subheader("📅 Sales by Day of Week")
     fig_day = px.box(df, x='day_name', y='weekly_sales', title='Sales by Day of Week')
@@ -154,9 +150,9 @@ with tab2:
     fig_dist = px.histogram(df, x='weekly_sales', nbins=50, title='Weekly Sales Distribution')
     st.plotly_chart(fig_dist, use_container_width=True)
 
-# ---------------------------
+
 # 🌡️ Tab 3: External Factors & Correlation
-# ---------------------------
+
 with tab3:
     st.subheader("⛽ Fuel Price vs Weekly Sales")
     fig_fuel = px.scatter(df, x='fuel_price', y='weekly_sales', trendline='ols')

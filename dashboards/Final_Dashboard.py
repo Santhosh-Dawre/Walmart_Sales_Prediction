@@ -5,9 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 
-# ---------------------------
-# 🧭 Dashboard Tabs
-# ---------------------------
+
 st.set_page_config(layout="wide", page_title="📈 Walmart Sales Forecast Dashboard")
 st.title("📈 Walmart Sales Intelligence Platform")
 
@@ -15,9 +13,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Sales Overview", "🤖 Model Perfo
 
 
 
-# ---------------------------
-# 📁 Load Data
-# ---------------------------
+
 df = pd.read_csv("C:/Users/Saisa/Downloads/Walmart_Sales/data/processed/feature_engineered_sales.csv", parse_dates=['date'])
 pred = pd.read_csv("C:/Users/Saisa/Downloads/Walmart_Sales/outputs/predictions.csv", parse_dates=['date'])
 resid = pd.read_csv("C:/Users/Saisa/Downloads/Walmart_Sales/outputs/residuals.csv")
@@ -25,15 +21,14 @@ metrics = pd.read_csv("C:/Users/Saisa/Downloads/Walmart_Sales/outputs/model_comp
 
 
 
-# Confirm store_name is in the dataset and use it
 store_mapping = dict(zip(df['store'], df['store_name']))
 
-# Merge predicted sales using store_name
+
 df = df.merge(pred[['date', 'store', 'predicted_sales']], on=['date', 'store'], how='left')
 
-# ---------------------------
-# 🎛️ Sidebar Filters
-# ---------------------------
+
+#  Sidebar Filters
+
 st.sidebar.header("Filter Data")
 store_list = sorted(df['store_name'].unique())
 selected_stores = st.sidebar.multiselect("Select Stores", store_list, default=store_list[:3])
@@ -42,15 +37,15 @@ date_range = st.sidebar.date_input("Select Date Range", [df['date'].min(), df['d
 
 
 
-# Filter Data
+
 filtered_df = df[df['store_name'].isin(selected_stores)]
 filtered_df = filtered_df[(filtered_df['date'] >= pd.to_datetime(date_range[0])) & (filtered_df['date'] <= pd.to_datetime(date_range[1]))]
 
-# Promo filter
+
 promo_filter = st.sidebar.radio("Promotion Week", options=["all", "promo", "no_promo"],
                                 format_func=lambda x: {"all": "All Weeks", "promo": "Promotion Only", "no_promo": "No Promotion"}[x])
 
-# Holiday filter
+
 holiday_filter = st.sidebar.radio("Holiday Filter", options=["all", "holiday", "non_holiday"],
                                   format_func=lambda x: {"all": "All Days", "holiday": "Holiday Weeks Only", "non_holiday": "Non-Holiday Weeks"}[x])
 
@@ -64,9 +59,9 @@ if holiday_filter == "holiday":
 elif holiday_filter == "non_holiday":
     filtered_df = filtered_df[filtered_df['holiday_flag'] == 0]
 
-# ---------------------------
-# 📊 Tab 1: Sales Overview
-# ---------------------------
+
+# Tab 1: Sales Overview
+
 with tab1:
     st.subheader("📦 Key KPIs")
 
@@ -97,20 +92,20 @@ with tab1:
 
         st.subheader("🗺️ Sales by Store on Map")
 
-        # Load store location data
+       
         location_df = pd.read_csv("C:/Users/Saisa/Downloads/Walmart_Sales/data/raw/store_locations.csv")
 
-        # Aggregate sales for selected filters
+       
         map_df = filtered_df.groupby('store_name', as_index=False)['weekly_sales'].sum()
         map_df = map_df.merge(location_df, on='store_name', how='left')
 
-        # Sort by sales for better scaling
+       
         map_df = map_df.sort_values(by="weekly_sales", ascending=False)
 
-        # Format hover text
+        
         map_df['hover_text'] = map_df['store_name'] + "<br>Total Sales: $" + map_df['weekly_sales'].round(0).astype(int).astype(str)
 
-        # Plot Map
+        
         fig_sales_map = px.scatter_map(
             map_df,
             lat="lat",
@@ -127,7 +122,7 @@ with tab1:
             title="🧭 Total Sales by Store Location"
         )
 
-        # Show map
+        
         fig_sales_map.update_layout(
             margin=dict(l=0, r=0, t=40, b=0),
             coloraxis_colorbar=dict(title="Sales"),
@@ -141,8 +136,8 @@ with tab1:
 
         st.subheader("🚨 Inventory Alert Hotspots (High Sales Weeks)")
 
-        # Highlight stores with unusually high sales
-        weekly_threshold = filtered_df['weekly_sales'].quantile(0.95)  # Top 5% sales
+        
+        weekly_threshold = filtered_df['weekly_sales'].quantile(0.95) 
         alert_df = filtered_df[filtered_df['weekly_sales'] > weekly_threshold].groupby('store_name')['weekly_sales'].count().reset_index()
         alert_df.columns = ['store_name', 'high_demand_weeks']
         alert_df = alert_df.merge(location_df, on='store_name', how='left')
@@ -171,12 +166,12 @@ with tab1:
     
    
 
-# ---------------------------
-# 🤖 Tab 2: Model Performance
-# ---------------------------
+
+# Tab 2: Model Performance
+
 with tab2:
     st.subheader("📋 Model Comparison Metrics")
-    # Highlight the model with the lowest RMSE
+    
     best_model = metrics.loc[metrics['RMSE'].idxmin(), 'Model']
 
     def highlight_best_model(row):
@@ -200,9 +195,24 @@ with tab2:
     fig_resid.add_hline(y=0, line_dash='dot')
     st.plotly_chart(fig_resid, use_container_width=True)
 
-# ---------------------------
+   
+    st.subheader("📊 Visual Comparison of Model Metrics")
+
+    
+    metrics_long = metrics.melt(id_vars='Model', var_name='Metric', value_name='Score')
+
+    
+    fig_bar = px.bar(metrics_long, x='Model', y='Score', color='Metric',
+                    barmode='group', text_auto='.2s',
+                    title="Model Comparison: MAE, RMSE, R² Score")
+
+    fig_bar.update_layout(xaxis_title="Model", yaxis_title="Metric Score", title_x=0.5)
+    st.plotly_chart(fig_bar, use_container_width=True)
+
+
+
 # 📈 Tab 3: Forecast Simulator (Live with toggles)
-# ---------------------------
+
 from prophet import Prophet
 
 with tab3:
@@ -211,11 +221,11 @@ with tab3:
     selected_store_name = st.selectbox("Select a Store for Forecasting", store_list)
     forecast_horizon = st.slider("Select Forecast Horizon (Weeks)", min_value=4, max_value=156, value=120, step=4)
 
-    # Toggle promotion/holiday impact simulation
+    
     simulate_promo = st.checkbox("Simulate Promotion Weeks?", value=False)
     simulate_holiday = st.checkbox("Simulate Holiday Weeks?", value=False)
 
-    # Prepare data for Prophet
+    
     store_df = df[df['store_name'] == selected_store_name][['date', 'weekly_sales']].rename(columns={'date': 'ds', 'weekly_sales': 'y'})
     store_df = store_df.groupby('ds').sum().reset_index()
 
@@ -225,18 +235,18 @@ with tab3:
     future = m.make_future_dataframe(periods=forecast_horizon, freq='W')
     forecast = m.predict(future)
 
-    # Apply simulation multiplier
+    
     multiplier = 1.0
     if simulate_promo:
-        multiplier *= 1.10  # +10% uplift
+        multiplier *= 1.10  
     if simulate_holiday:
-        multiplier *= 1.05  # +5% uplift
+        multiplier *= 1.05  
 
     forecast['yhat'] *= multiplier
     forecast['yhat_upper'] *= multiplier
     forecast['yhat_lower'] *= multiplier
 
-    # Plot forecast
+    
     fig_forecast = px.line()
     fig_forecast.add_scatter(x=store_df['ds'], y=store_df['y'], mode='lines+markers', name='Historical Sales')
     fig_forecast.add_scatter(x=forecast['ds'], y=forecast['yhat'], mode='lines', name='Forecast')
@@ -262,9 +272,9 @@ with tab3:
 
 
 
-# ---------------------------
-# 🧠 Tab 4: SHAP Explainability (Static Image)
-# ---------------------------
+
+# 🧠 Tab 4: SHAP Explainability 
+
 with tab4:
     st.subheader("🧠 SHAP Explainability")
 
@@ -279,9 +289,9 @@ with tab4:
 
 
 
-# ---------------------------
+
 # 📥 Tab 5: Export
-# ---------------------------
+
 with tab5:
     st.subheader("📤 Download Filtered Data")
     csv = filtered_df.to_csv(index=False).encode('utf-8')
